@@ -1,0 +1,12 @@
+{
+    "C_Cpp.intelliSenseEngine": "default",
+    "idf.espIdfPathWin": "C:\\Users\\ASUS\\esp\\v5.4.1\\esp-idf",
+    "idf.toolsPathWin": "C:\\Users\\ASUS\\.espressif",
+    "idf.pythonInstallPath": "C:\\Users\\ASUS\\.espressif\\tools\\idf-python\\3.11.2\\python.exe",
+    "idf.flashType": "UART",
+    "idf.portWin": "COM4",
+    "files.associations": {
+        "time.h": "c",
+        "charconv": "c"
+    }
+}
