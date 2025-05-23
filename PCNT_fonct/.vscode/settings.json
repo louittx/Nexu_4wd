@@ -12,6 +12,7 @@
         "freertos.h": "c",
         "bitset": "cpp",
         "algorithm": "cpp",
-        "format": "cpp"
+        "format": "cpp",
+        "compare": "cpp"
     }
 }
