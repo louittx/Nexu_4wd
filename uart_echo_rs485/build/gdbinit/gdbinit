@@ -1,0 +1,2 @@
+source C:/Users/ASUS/Desktop/esp_32_idf/uart_echo_rs485/build/gdbinit/symbols
+source C:/Users/ASUS/Desktop/esp_32_idf/uart_echo_rs485/build/gdbinit/connect
