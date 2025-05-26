@@ -1,87 +1,33 @@
 #include "lib/config.h"
 
-uint8_t oldData = 0;
-uint8_t NextData = 0;
-void InitHc595(gpio_num_t dataPin, gpio_num_t clockPin, gpio_num_t latchPin)
-{
-    ConfigGPIO(dataPin);
-    ConfigGPIO(clockPin);
-    ConfigGPIO(latchPin);
-}
+int Data = 0;
 
-void Hc595WriteByte(uint8_t data, gpio_num_t dataPin, gpio_num_t clockPin, gpio_num_t latchPin)
-{
-    uint8_t oldData = data;
-    GPIOSetLevel(latchPin, 0);
-    for (int i = 0; i < 8; i++)
-    {
-         GPIOSetLevel(clockPin, 0);
-        GPIOSetLevel(dataPin, (data & (1 << (7 - i))) ? 1 : 0);
-        GPIOSetLevel(clockPin, 1);
-        vTaskDelay(1/ portTICK_PERIOD_MS);
-    }
-    GPIOSetLevel(latchPin, 1);
-}
-int DirHc595(int dir, bool sens,gpio_num_t dataPin, gpio_num_t clockPin, gpio_num_t latchPin)
-{
-    switch (dir)
-    {
-        case 0:
-            if (sens)
-            {
-                NextData = oldData | 0b1;
-            }
-            else
-            {
-                NextData = oldData | 0b10;
-            }
-            break;
-        case 1:
-            if (sens)
-            {
-                NextData = oldData | 0b100;
-            }
-            else
-            {
-                NextData = oldData | 0b1000;
-            }
-            break;
-        case 2:
-            if (sens)
-            {
-                NextData = oldData | 0b10000;
-            }
-            else
-            {
-                NextData = oldData | 0b100000;
-            }
-            break;
-        case 3:
-            if (sens)
-            {
-                NextData = oldData | 0b1000000;
-            }
-            else
-            {
-                NextData = oldData | 0b10000000;
-            }
-            break;
-    }
-    return NextData;
-}
 
 #define PinDS GPIO_NUM_16
 #define PinSTCP GPIO_NUM_4
 #define PinSHCP GPIO_NUM_0
 
+MotorEncoderHc595 motorEncoderHc595;
+MotorEncoderHc595 motorEncoderHc5952;
+
+
 extern "C" void app_main()
 {
-    InitHc595(PinDS, PinSHCP, PinSTCP);
-    while (true)
-    {
-        int dat = DirHc595(1,0, PinDS, PinSHCP, PinSTCP);
-        ESP_LOGI("Hc595", "Data: %d", dat);
-        Hc595WriteByte(dat, PinDS, PinSHCP, PinSTCP);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
+    motorEncoderHc595.hc595Attached(PinDS, PinSHCP, PinSTCP);
+    motorEncoderHc595.MotorAttached(GPIO_NUM_2, LEDC_CHANNEL_0, 0);
+    motorEncoderHc595.MotorResolution(1000, LEDC_TIMER_10_BIT);
+    motorEncoderHc595.EncodeurAttached(GPIO_NUM_5, GPIO_NUM_18, PCNT_UNIT_0, 10000);
+    motorEncoderHc595.InitMotorEncodeurHC595();
+    
+    motorEncoderHc5952.hc595Attached(PinDS, PinSHCP, PinSTCP);
+    motorEncoderHc5952.MotorAttached(GPIO_NUM_2, LEDC_CHANNEL_0, 1);
+    motorEncoderHc5952.MotorResolution(1000, LEDC_TIMER_10_BIT);
+    motorEncoderHc5952.EncodeurAttached(GPIO_NUM_5, GPIO_NUM_18, PCNT_UNIT_0, 10000);
+    motorEncoderHc5952.InitMotorEncodeurHC595();
+
+    Data = motorEncoderHc5952.DirHc595(2);
+    Data = motorEncoderHc595.DirHc595(2);
+    motorEncoderHc595.Hc595WriteByte(Data);
+    ESP_LOGI("MotorEncoderHc595", "Data sent to HC595: %d", Data);
+
 }
