@@ -247,3 +247,111 @@ void MotorEncoder::SetSpeedPID(int consigne, float Speeds, float Kp, float Ki, f
 }
 
 #pragma endregion
+
+#pragma region MotorEncoderHc595
+void MotorEncoderHc595::MotorAttached(gpio_num_t PWM, ledc_channel_t channel,uint8_t motor)
+{
+    _PWM = PWM;
+    __channel = channel;
+    _motor = motor;
+}
+void MotorEncoderHc595::MotorResolution(uint32_t Frequency, ledc_timer_bit_t DutyResolution)
+{
+    _Frequency = Frequency;
+    _DutyResolution = DutyResolution;
+}
+void MotorEncoderHc595::EncodeurAttached(gpio_num_t PinA, gpio_num_t PinB, pcnt_unit_t PcntUnit, uint64_t limit)
+{
+    _PinA = PinA;
+    _PinB = PinB;
+    _PcntUnit = PcntUnit;
+    _limit = limit;
+}
+void MotorEncoderHc595::hc595Attached(gpio_num_t dataPin, gpio_num_t clockPin, gpio_num_t latchPin)
+{
+    _dataPin = dataPin;
+    _clockPin = clockPin;
+    _latchPin = latchPin;
+}
+void MotorEncoderHc595::InitMotorEncodeurHC595()
+{
+    PWMInit(_PWM, _Frequency, _DutyResolution, __channel);
+    EncoderInit(_PinA, _PinB, _PcntUnit, _limit);
+    ConfigGPIO(_dataPin);
+    ConfigGPIO(_clockPin);
+    ConfigGPIO(_latchPin);
+    Hc595WriteByte(0);
+    Integral = 0;
+    OldError = 0;
+    MotorEncoderHc595::SetSpeed(0);
+}
+
+void MotorEncoderHc595::SetSpeed(int Speed)
+{
+    if (Speed > 254)
+        Speed = 254;
+    else if (Speed < 1)
+        Speed = 0;
+    PWMlevel(__channel, Speed);
+}
+float MotorEncoderHc595::SpeedMotor()
+{
+    int count = EncoderClear(_PcntUnit);
+    count = EncoderSetCount(_PcntUnit);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+    count = EncoderSetCount(_PcntUnit);
+    float vitesse_moteur = (((count) * (60 / 0.01)) / 24);
+    vitesse_moteur = vitesse_moteur;
+    return vitesse_moteur;
+}
+void MotorEncoderHc595::SetSpeedPID(int consigne, float Speeds, float Kp, float Ki, float Kd)
+{
+    if (Speeds == -1)
+    {
+        Speeds = MotorEncoderHc595::SpeedMotor();
+    }
+    float SpeedNorm = Speeds / 7650.0;
+    float ConsigneNorm = consigne / 7650.0;
+    float Error = ConsigneNorm - SpeedNorm;
+    Integral += Error * 0.01;
+    float Derivative = (Error - OldError) / 0.01;
+    float Sortie = Kp * Error + Ki * Integral + Kd * Derivative;
+    float PWM = Sortie * 254.0;
+    if (PWM > 254)
+        PWM = 254;
+    else if (PWM < 0)
+        PWM = 0;
+    OldError = Error;
+    MotorEncoderHc595::SetSpeed(PWM);
+}
+int MotorEncoderHc595::DirHc595(int dir)
+{
+    int NextData = 0;
+    switch (dir)
+    {
+        case 0:
+            NextData = Data |(0b00<<(2*_motor));
+            break;
+        case 1:
+            NextData = Data |(0b01<<(2*_motor));
+            break;
+        case 2 : 
+            NextData = Data |(0b10<<(2*_motor));
+            break;
+    }
+    return NextData;
+}
+void MotorEncoderHc595::Hc595WriteByte(uint8_t data)
+{
+    Data = data;
+    GPIOSetLevel(_latchPin, 0);
+    for (int i = 0; i < 8; i++)
+    {
+        GPIOSetLevel(_clockPin, 0);
+        GPIOSetLevel(_dataPin, (data & (1 << (7 - i))) ? 1 : 0);
+        GPIOSetLevel(_clockPin, 1);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
+    }
+    GPIOSetLevel(_latchPin, 1);
+}
+

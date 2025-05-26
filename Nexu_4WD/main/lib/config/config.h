@@ -1,6 +1,8 @@
 #ifndef config_h
 #define config_h
 
+extern int Data;
+
 extern "C"
 {
 #include "freertos/FreeRTOS.h"
@@ -74,4 +76,34 @@ private:
     float OldError;
 };
 
+
+class MotorEncoderHc595
+{
+    public:
+        void MotorAttached(gpio_num_t PWM, ledc_channel_t channel, uint8_t motor);
+        void MotorResolution(uint32_t Frequency, ledc_timer_bit_t DutyResolution);
+        void EncodeurAttached(gpio_num_t PinA, gpio_num_t PinB, pcnt_unit_t PcntUnit, uint64_t limit);
+        void hc595Attached(gpio_num_t dataPin, gpio_num_t clockPin, gpio_num_t latchPin);
+        void InitMotorEncodeurHC595();
+        void SetSpeed(int Speed);
+        float SpeedMotor();
+        void SetSpeedPID(int consigne, float Speeds, float Kp, float Ki, float Kd);
+        int DirHc595(int dir);
+        void Hc595WriteByte(uint8_t data);
+    private:
+        uint8_t _motor;
+        gpio_num_t _PWM;
+        ledc_channel_t __channel;
+        uint32_t _Frequency;
+        ledc_timer_bit_t _DutyResolution;
+        gpio_num_t _PinA;
+        gpio_num_t _PinB;
+        pcnt_unit_t _PcntUnit;
+        uint64_t _limit;
+        float Integral;
+        float OldError;
+        gpio_num_t _dataPin;
+        gpio_num_t _clockPin;
+        gpio_num_t _latchPin;
+};
 #endif
