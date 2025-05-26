@@ -1,0 +1,21 @@
+dependencies:
+  espressif/esp_hosted:
+    component_hash: c55afc0b192077e2178246331e6787ccae851d54e6e5a1ce35e84e8013a6ebad
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.3'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 2.0.2
+  idf:
+    source:
+      type: idf
+    version: 5.4.1
+direct_dependencies:
+- espressif/esp_hosted
+- idf
+manifest_hash: 34ba98f6f40f0f7eb77d221951ed2e6590ee1fdb41f3ed3633333aca1962c762
+target: esp32
+version: 2.0.0
