@@ -28,11 +28,13 @@ int16_t EncoderSetCount(pcnt_unit_t PcntUnit)
     pcnt_get_counter_value(PcntUnit, &count);
     return count;
 }
+
 int EncoderClear(pcnt_unit_t PcntUnit)
 {
     pcnt_counter_clear(PcntUnit);
     return 0;
 }
+
 void EncoderPause(pcnt_unit_t PcntUnit)
 {
     pcnt_counter_pause(PCNT_UNIT_0);
@@ -70,6 +72,7 @@ void PWMInit(gpio_num_t Pin, uint32_t Frequency, ledc_timer_bit_t DutyResolution
 
     PWMlevel(channelle, 0);
 }
+
 void PWMlevel(ledc_channel_t channel, int duty)
 {
     ledc_set_duty(LEDC_LOW_SPEED_MODE, channel, duty);
@@ -91,6 +94,7 @@ void ConfigGPIO(gpio_num_t Pin)
     gpio_config(&io_conf_led);
     GPIOSetLevel(Pin, 0);
 }
+
 void GPIOSetLevel(gpio_num_t Pin, uint8_t Level)
 {
     gpio_set_level(Pin, Level);
@@ -107,11 +111,13 @@ void Motor::MotorAttached(gpio_num_t PWM, gpio_num_t PinA, gpio_num_t PinB, ledc
     In_2 = PinB;
     _channel = channel;
 }
+
 void Motor::MotorResolution(uint32_t Frequency, ledc_timer_bit_t DutyResolution)
 {
     _Frequency = Frequency;
     _DutyResolution = DutyResolution;
 }
+
 void Motor::InitMotor()
 {
     PWMInit(PinPWM, _Frequency, _DutyResolution, _channel);
@@ -124,24 +130,24 @@ void Motor::InitMotor()
 void Motor::SetSpeed(int Speed)
 {
     if (Speed > 254)
-        Speed = 254;
+        Speed = 254; // for the driveur never go to the 100%
     else if (Speed < 1)
-        Speed = 0;
-    PWMlevel(_channel, Speed);
+        Speed = 0; // for the driveur nevrt go to the negatif
+    PWMlevel(_channel, Speed); // controle speed
 }
 void Motor::SetDirection(int Direction)
 {
     switch (Direction)
     {
-    case 0:
+    case 0: // motor short circuited so no freewheel
         GPIOSetLevel(In_1, 0);
         GPIOSetLevel(In_2, 0);
         break;
-    case 1:
+    case 1: // motor turn left
         GPIOSetLevel(In_1, 1);
         GPIOSetLevel(In_2, 0);
         break;
-    case 2:
+    case 2: // motor turn rigth
         GPIOSetLevel(In_1, 0);
         GPIOSetLevel(In_2, 1);
         break;
@@ -219,8 +225,8 @@ float MotorEncoder::SpeedMotor()
     int count = EncoderClear(_PcntUnit);
     count = EncoderSetCount(_PcntUnit);
     vTaskDelay(10 / portTICK_PERIOD_MS);
-    count = EncoderSetCount(_PcntUnit);
-    float vitesse_moteur = (((count) * (60 / 0.01)) / 24);
+    count = EncoderSetCount(_PcntUnit); // numbre of counts in 50ms
+    float vitesse_moteur = (((count) * (60 / 0.01)) / 24); // convert to tr/min   24 = numbret of pals
     vitesse_moteur = vitesse_moteur;
     return vitesse_moteur;
 }
@@ -229,19 +235,15 @@ void MotorEncoder::SetSpeedPID(int consigne, float Speeds, float Kp, float Ki, f
 {
     if (Speeds == -1)
     {
-        Speeds = MotorEncoder::SpeedMotor();
+        Speeds = MotorEncoder::SpeedMotor(); // read speeds
     }
-    float SpeedNorm = Speeds / 7650.0;
-    float ConsigneNorm = consigne / 7650.0;
+    float SpeedNorm = Speeds / 7650.0; // convert in 0 to 7650 in 0 to 1
+    float ConsigneNorm = consigne / 7650.0; 
     float Error = ConsigneNorm - SpeedNorm;
     Integral += Error * 0.01;
     float Derivative = (Error - OldError) / 0.01;
     float Sortie = Kp * Error + Ki * Integral + Kd * Derivative;
     float PWM = Sortie * 254.0;
-    if (PWM > 254)
-        PWM = 254;
-    else if (PWM < 0)
-        PWM = 0;
     OldError = Error;
     MotorEncoder::SetSpeed(PWM);
 }
@@ -330,7 +332,7 @@ int MotorEncoderHc595::DirHc595(int dir)
     switch (dir)
     {
         case 0:
-            NextData = (Data & ~(0b11 << (2 * _motor))) | (0b00 << (2 * _motor));;
+            NextData = (Data & ~(0b11 << (2 * _motor))) | (0b00 << (2 * _motor)); // set the pin of 74HC595 to direction for the motor
             break;
         case 1:
             NextData = (Data & ~(0b11 << (2 * _motor))) | (0b01 << (2 * _motor));
@@ -344,14 +346,14 @@ int MotorEncoderHc595::DirHc595(int dir)
 void MotorEncoderHc595::Hc595WriteByte(uint8_t data)
 {
     Data = data;
-    GPIOSetLevel(_latchPin, 0);
+    GPIOSetLevel(_latchPin, 0); // stop the pin for the transmite to 74hc595
     for (int i = 0; i < 8; i++)
     {
         GPIOSetLevel(_clockPin, 0);
-        GPIOSetLevel(_dataPin, (data & (1 << (7 - i))) ? 1 : 0);
-        GPIOSetLevel(_clockPin, 1);
+        GPIOSetLevel(_dataPin, (data & (1 << (7 - i)))&0x01); // set value Pin 74hc595
+        GPIOSetLevel(_clockPin, 1); // swith of registre
         vTaskDelay(1 / portTICK_PERIOD_MS);
     }
-    GPIOSetLevel(_latchPin, 1);
+    GPIOSetLevel(_latchPin, 1); // updates the 74hc595
 }
 

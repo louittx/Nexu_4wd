@@ -65,28 +65,19 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
         ESP_LOGI(SPP_TAG, "ESP_SPP_CL_INIT_EVT");
         break;
     case ESP_SPP_DATA_IND_EVT:
-        /*ESP_LOGI(SPP_TAG, "ESP_SPP_DATA_IND_EVT len:%d handle:%" PRIu32,
-                param->data_ind.len, param->data_ind.handle);*/
         if (param->data_ind.len < 128)
         {
-             //ESP_LOG_BUFFER_HEX("", param->data_ind.data, param->data_ind.len);
             // send message to client
-            SendMessage = !SendMessage;
+            SendMessage = !SendMessage; // inverce sendMessage for switch for the send message 
             
-            esp_spp_write(param->data_ind.handle, LengMessage, (uint8_t *)Buffer);
+            esp_spp_write(param->data_ind.handle, LengMessage, (uint8_t *)Buffer); // send Message
             // message_get
             for (int i = 0; i < (param->data_ind.len); i++)
             {
-                get_message[i] = param->data_ind.data[i];
+                get_message[i] = param->data_ind.data[i];// stoke the message to char
             }
-            LengGetMessage = param->data_ind.len;
+            LengGetMessage = param->data_ind.len;// stoke the lengGetMessage
         }
-        break;
-    case ESP_SPP_CONG_EVT:
-        //ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT");
-        break;
-    case ESP_SPP_WRITE_EVT:
-        //ESP_LOGI(SPP_TAG, "ESP_SPP_WRITE_EVT");
         break;
     case ESP_SPP_SRV_OPEN_EVT:
         ESP_LOGI(SPP_TAG, "ESP_SPP_SRV_OPEN_EVT status:%d handle:%" PRIu32 ", rem_bda:[%s]", param->srv_open.status,
