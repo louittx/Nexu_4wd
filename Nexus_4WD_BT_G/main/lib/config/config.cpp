@@ -319,28 +319,13 @@ void MotorEncoderHc595::SetSpeedPID(int consigne, float Speeds, float Kp, float 
     float Derivative = (Error - OldError) / 0.02;
     float Sortie = Kp * Error + Ki * Integral + Kd * Derivative;
     float PWM = Sortie * 254.0;
-    if (PWM > 254)
-        PWM = 254;
-    else if (PWM < 0)
-        PWM = 0;
     OldError = Error;
     MotorEncoderHc595::SetSpeed(PWM);
 }
 int MotorEncoderHc595::DirHc595(int dir)
 {
     int NextData = 0;
-    switch (dir)
-    {
-        case 0:
-            NextData = (Data & ~(0b11 << (2 * _motor))) | (0b00 << (2 * _motor)); // set the pin of 74HC595 to direction for the motor
-            break;
-        case 1:
-            NextData = (Data & ~(0b11 << (2 * _motor))) | (0b01 << (2 * _motor));
-            break;
-        case 2 : 
-            NextData = (Data & ~(0b11 << (2 * _motor))) | (0b10 << (2 * _motor));
-            break;
-    }
+    NextData = (Data & ~(0b11 << (2 * _motor))) | (dir << (2 * _motor)); // set the pin of 74HC595 to direction for the motor
     return NextData;
 }
 void MotorEncoderHc595::Hc595WriteByte(uint8_t data)
@@ -350,7 +335,7 @@ void MotorEncoderHc595::Hc595WriteByte(uint8_t data)
     for (int i = 0; i < 8; i++)
     {
         GPIOSetLevel(_clockPin, 0);
-        GPIOSetLevel(_dataPin, (data & (1 << (7 - i)))&0x01); // set value Pin 74hc595
+        GPIOSetLevel(_dataPin, (data & (1 << (7 - i))) ? 1 : 0); // set value Pin 74hc595  // ? si ... alors ... sinon 
         GPIOSetLevel(_clockPin, 1); // swith of registre
         vTaskDelay(1 / portTICK_PERIOD_MS);
     }

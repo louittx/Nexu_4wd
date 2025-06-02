@@ -39,7 +39,7 @@ void InitRS485()
         .source_clk = UART_SCLK_DEFAULT,
     };
     esp_log_level_set(TAG, ESP_LOG_INFO);
-    ESP_ERROR_CHECK(uart_driver_install(uart_num, BUF_SIZE * 2, 0, 0, NULL, 0));
+    ESP_ERROR_CHECK(uart_driver_install(uart_num, BUF_SIZE*2, 0, 0, NULL, 0));
     ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
     ESP_ERROR_CHECK(uart_set_pin(uart_num, ECHO_TEST_TXD, ECHO_TEST_RXD, ECHO_TEST_RTS, ECHO_TEST_CTS));
     ESP_ERROR_CHECK(uart_set_mode(uart_num, UART_MODE_RS485_HALF_DUPLEX));
@@ -86,9 +86,9 @@ void Sensor::SensorAdress(uint8_t Address)
     sendSetTrigger[2] = _Address;
     sendDistance[2] = _Address;
     sendTemp[2] = _Address;
-    sendSetTrigger[5] = (_Address + 0x100 )%0x100; // 0x100 = sum sans adress
-    sendDistance[5] = (_Address + 0x101)%0x100; // 0x101 = sum sans adress
-    sendTemp[5] = (_Address + 0x102)%0x100; // 0x102 = sum sans adress
+    sendSetTrigger[5] = (_Address + 0x100 )%0x100; // 0x100 = sum without adress
+    sendDistance[5] = (_Address + 0x101)%0x100; // 0x101 = sum without adress
+    sendTemp[5] = (_Address + 0x102)%0x100; // 0x102 = sum without adress
 }
 
 void Sensor::InitSensorTrigger()
@@ -116,7 +116,7 @@ int Sensor::ValueDistance(char data[126])
     int sum = 0;
     if (data[0] == 0x55 && data[1] == 0xaa && data[2] == _Address && data[3] == 0x02 && data[4] == 0x02)
     {
-        distance = (data[5] << 8) + data[6];
+        distance = (data[5] << 8) + data[6]; // read distance
         for (int i = 0; i < 7; i++)
         {
             sum = sum + data[i];
@@ -127,6 +127,7 @@ int Sensor::ValueDistance(char data[126])
     }
     return -1;
 }
+
 float Sensor::ValueTemp(char data[126])
 {
     float temp = 0;
@@ -135,11 +136,11 @@ float Sensor::ValueTemp(char data[126])
     {
         if (data[5]>>4 == 0x0)
         {
-            temp = (((data[5]<<8)&0x0FFF) + data[6])*0.1;
+            temp = (((data[5]<<8)&0x0FFF) + data[6])*0.1; // *0.1 beacause the temps is given by the sensor to temp*10
         }
         else
         {
-            temp = -((((data[5]<<8)&0x0FFF) + data[6]))*0.1;
+            temp = -((((data[5]<<8)&0x0FFF) + data[6]))*0.1; // temps negatif
         }
         for (int i = 0; i < 7; i++)
         {
