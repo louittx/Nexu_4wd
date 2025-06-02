@@ -37,7 +37,7 @@ extern "C"
 #pragma region Defines
 
 #pragma region Define Pin
-
+// pin for the motor
 #define PinPWMA GPIO_NUM_19
 #define PinMAEncoderA GPIO_NUM_34
 #define PinMAEncoderB GPIO_NUM_35
@@ -51,6 +51,7 @@ extern "C"
 #define PinMDEncoderA GPIO_NUM_27
 #define PinMDEncoderB GPIO_NUM_14
 
+// Pin fot the 74hc595
 #define DS GPIO_NUM_16
 #define STCP GPIO_NUM_4
 #define SHCP GPIO_NUM_0
@@ -58,59 +59,63 @@ extern "C"
 #pragma endregion
 #pragma region Define Variables
 #define FrequencyMotor 300000
-#define DutyResolutionMotor LEDC_TIMER_8_BIT
+#define DutyResolutionMotor LEDC_TIMER_8_BIT // LEDC_TIMER_8_BIT = 0 to 255
 #pragma endregion
 
 #pragma endregion
 
 #pragma region Variables
-int ValueMessage;
+
+// variabel for the blutooth
 int SpeedMessage;
 int AngleMessage;
 int DirectionMessage;
 int Capteur[3];
 int SM[4];
-int VM[4];
 bool SendMessage = true;
-esp_spp_cb_param_t *param;
-int DirectionMotor;
-
-u_int8_t get_message[126];
-char Buffer[128];
+u_int8_t get_message[16];
+char Buffer[16];
 u_int8_t AddressMotor = 0x44;
 u_int8_t AddressSensor = 0x45;
-char MotorandSensorBuffer[32];
-
-u_int32_t MotorAndSensorMessage = 0;
-uint32_t ValueMotorAndSensor = 0;
 uint8_t LengMessage = 0;
 uint8_t LengGetMessage = 0;
 
+
+// variable for the RS485
 char DataReceive[126];
 
+// variable for the 74HC595
 int Data = 0;
 int OldData = 0;
 int length = 0;
 
 #pragma endregion
 
-SHELL_PARAMETER_FLOAT(kp, "kp", 1);
-SHELL_PARAMETER_FLOAT(ki, "ki", 2.0);
-SHELL_PARAMETER_FLOAT(kd, "kd", 0.001);
-SHELL_PARAMETER_INT(co, "co", 0);
-SHELL_PARAMETER_INT(etat, "etat", 0);
 
+// motif varible for ce PID
+/*SHELL_PARAMETER_FLOAT(kp, "kp", 1);
+SHELL_PARAMETER_FLOAT(ki, "ki", 2.0);
+SHELL_PARAMETER_FLOAT(kd, "kd", 0.001);*/
+
+//variable for the PID not motif
+const uint8_t kp = 1;
+const uint8_t ki = 2;
+const float = 0.001;
+
+// defined the motor
 MotorEncoderHc595 MotorA;
 MotorEncoderHc595 MotorB;
 MotorEncoderHc595 MotorC;
 MotorEncoderHc595 MotorD;
 
+// defined the Sensor 
 Sensor s1;
 Sensor s2;
 Sensor s3;
 
 #pragma region functions
 
+// fonctiont for the convert 3 msg Sensor in 1 msg Sensor
 u_int64_t MesssageToSensor(int16_t Sensor1, int16_t Sensor2, int16_t Sensor3)
 {
     u_int64_t Message = 0;
@@ -120,6 +125,7 @@ u_int64_t MesssageToSensor(int16_t Sensor1, int16_t Sensor2, int16_t Sensor3)
     return Message;
 }
 
+// fonctiont for the send the msg in the buffer
 void SendMessageToSensor(u_int64_t Message)
 {
     for (int i = 0; i < 5; i++)
@@ -130,8 +136,9 @@ void SendMessageToSensor(u_int64_t Message)
 
 #pragma endregion
 
-#pragma region Functions Task
 
+#pragma region Functions Task
+// task for say the Message then send Message
 void ValueSendMessage(void *pvParameters)
 {
     while (1)
@@ -154,7 +161,6 @@ void ValueSendMessage(void *pvParameters)
 #pragma region MsgSensor
             Buffer[0] = AddressSensor;
             u_int64_t MessageSensor = MesssageToSensor(Capteur[0], Capteur[1], Capteur[2]);
-            // ESP_LOGI("Message", "MEssage = %llx",MessageSensor );
             SendMessageToSensor(MessageSensor);
 
 #pragma endregion
@@ -162,6 +168,7 @@ void ValueSendMessage(void *pvParameters)
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
+// task for tranforme the get msg to variable
 void ValueGetMessage(void *pvParameters)
 {
     while (1)
@@ -177,19 +184,20 @@ void ValueGetMessage(void *pvParameters)
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
+//task for the send and receviede the dist thanks to RS485
 static void RS485(void *arg)
 {
     InitRS485();
     while (1)
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++) // repaiter for the 3 capteur
         {
             switch (i)
             {
             case 0:
                 s1.InitSensorTrigger();
-                vTaskDelay(80 / portTICK_PERIOD_MS);
-                length = s1.GetDistance();
+                vTaskDelay(80 / portTICK_PERIOD_MS); // delay for the capteur is the time of receveite value
+                length = s1.GetDistance(); // allow stok the dist
                 break;
             case 1:
                 s2.InitSensorTrigger();
@@ -203,9 +211,11 @@ static void RS485(void *arg)
                 break;
             }
         }
-        // length = s1.GetTemp();
+        // code for the reseveid the temp
+        /* length = s1.GetTemp(); */
     }
 }
+// task for the control the speed Motor
 void SetSpeeds(void *arg)
 {
     while (1)
@@ -218,12 +228,12 @@ void SetSpeeds(void *arg)
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
+// task for the control the dirction of robot
 void SetAngle(void *arg)
 {
     while (1)
     {
-        uint16_t GetAngle = (AngleMessage * 360) / 255;
-        // printf("GetAngle : %d\n", GetAngle);
+        uint16_t GetAngle = (AngleMessage * 360) / 0xFF; // convet the msg to angle ranging from 0 to 360
         if (GetAngle < 180)
         {
             Data = MotorA.DirHc595(1);
@@ -248,11 +258,14 @@ extern "C"
 {
     void app_main(void);
 }
+
+
 void app_main(void)
 {
     bt_init();
-    shell_init(115200);
-    shell_start_task();
+    for the modifer the variable PID
+    /*shell_init(115200);
+    shell_start_task();*/
     s1.SensorAdress(0x11);
     s2.SensorAdress(0x12);
     s3.SensorAdress(0x13);
@@ -286,25 +299,29 @@ void app_main(void)
     MotorD.InitMotorEncodeurHC595();
 #pragma endregion
 #pragma endregion
-    length = 0;
+    
+    // start the task
     xTaskCreate(SetAngle, "SetAngle", 2048, NULL, 0, NULL);
     xTaskCreate(SetSpeeds, "SetSpeed", 2048, NULL, 4, NULL);
     xTaskCreate(RS485, "RS485", 2048, NULL, 2, NULL);
     xTaskCreate(ValueGetMessage, "GetMsg", 4096, NULL, 5, NULL);
     xTaskCreate(ValueSendMessage, "SendMsg", 4096, NULL, 3, NULL);
+
+
     while (1)
     {
-        Capteur[0] = s1.ValueDistance(DataReceive) * 0xFFF / 300;
+        Capteur[0] = s1.ValueDistance(DataReceive) * 0xFFF / 300; // convert the diatnce of 0 to 300 in 0 to FFF
         Capteur[1] = s2.ValueDistance(DataReceive) * 0xFFF / 300;
         Capteur[2] = s3.ValueDistance(DataReceive) * 0xFFF / 300;
-        SM[0] = MotorA.SpeedMotor();
+        SM[0] = MotorA.SpeedMotor(); // read speed of motor
         SM[1] = MotorB.SpeedMotor();
         SM[2] = MotorC.SpeedMotor();
         SM[3] = MotorD.SpeedMotor();
-        if (Data != OldData)
+        
+        if (Data != OldData) // for not change if there is nothing to change
         {
             OldData = Data;
-            MotorA.Hc595WriteByte(OldData);
+            MotorA.Hc595WriteByte(OldData); // push th confiration to the pins in the 74HC595
         }
         vTaskDelay(50 / portTICK_PERIOD_MS);
     }

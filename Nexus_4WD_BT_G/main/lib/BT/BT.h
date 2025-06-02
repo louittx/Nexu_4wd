@@ -26,11 +26,11 @@
 #pragma endregion
 
 
-extern u_int8_t get_message[126];
+extern u_int8_t get_message[16];
 extern uint8_t LengGetMessage;
 extern int VM[4];
 extern int Capteur[3];
-extern char Buffer[128];
+extern char Buffer[16];
 extern bool SendMessage;
 extern uint8_t LengMessage;
 
