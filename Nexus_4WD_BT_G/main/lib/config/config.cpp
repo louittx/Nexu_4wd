@@ -326,7 +326,13 @@ int MotorEncoderHc595::DirHc595(int dir)
 {
     int NextData = 0;
     NextData = (Data & ~(0b11 << (2 * _motor))) | (dir << (2 * _motor)); // set the pin of 74HC595 to direction for the motor
-    return NextData;
+    /* exempl data = 01 11 00 10 with dir = 0b01 = 1, we want to modify the motor 2 so 11 to 01 for that : 
+     01 11 00 10 & 11 00 11 11 = 01 00 00 10, for have 11 00 11 11, we can ~(00 11 00 00) thanks to ~(0b11<<(2*_motor))
+     for replace 00 to 01, we use "or logic" 
+     so "| (dir << (2 * _motor))" 
+    
+    */
+    return NextData; 
 }
 void MotorEncoderHc595::Hc595WriteByte(uint8_t data)
 {
@@ -335,7 +341,7 @@ void MotorEncoderHc595::Hc595WriteByte(uint8_t data)
     for (int i = 0; i < 8; i++)
     {
         GPIOSetLevel(_clockPin, 0);
-        GPIOSetLevel(_dataPin, (data & (1 << (7 - i))) ? 1 : 0); // set value Pin 74hc595  // ? si ... alors ... sinon 
+        GPIOSetLevel(_dataPin, (Data >> (7-i))&0x01); // set value Pin 74hc595  
         GPIOSetLevel(_clockPin, 1); // swith of registre
         vTaskDelay(1 / portTICK_PERIOD_MS);
     }
