@@ -242,8 +242,8 @@ void MotorEncoder::SetSpeedPID(int consigne, float Speeds, float Kp, float Ki, f
     float Error = ConsigneNorm - SpeedNorm;
     Integral += Error * 0.01;
     float Derivative = (Error - OldError) / 0.01;
-    float Sortie = Kp * Error + Ki * Integral + Kd * Derivative;
-    float PWM = Sortie * 254.0;
+    float OUTPUT = Kp * Error + Ki * Integral + Kd * Derivative;
+    float PWM = OUTPUT * 254.0;
     OldError = Error;
     MotorEncoder::SetSpeed(PWM);
 }
@@ -326,11 +326,10 @@ int MotorEncoderHc595::DirHc595(int dir)
 {
     int NextData = 0;
     NextData = (Data & ~(0b11 << (2 * _motor))) | (dir << (2 * _motor)); // set the pin of 74HC595 to direction for the motor
-    /* exempl data = 01 11 00 10 with dir = 0b01 = 1, we want to modify the motor 2 so 11 to 01 for that : 
+    /* exemple data = 01 11 00 10 with dir = 0b01 = 1, we want to modify the motor 2 so 11 to 01 for that : 
      01 11 00 10 & 11 00 11 11 = 01 00 00 10, for have 11 00 11 11, we can ~(00 11 00 00) thanks to ~(0b11<<(2*_motor))
      for replace 00 to 01, we use "or logic" 
      so "| (dir << (2 * _motor))" 
-    
     */
     return NextData; 
 }

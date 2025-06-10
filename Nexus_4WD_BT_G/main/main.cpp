@@ -100,7 +100,7 @@ SHELL_PARAMETER_FLOAT(kd, "kd", 0.001);*/
 //variable for the PID not motif
 const uint8_t kp = 1;
 const uint8_t ki = 2;
-const float = 0.001;
+const float kd = 0.001;
 
 // defined the motor
 MotorEncoderHc595 MotorA;
@@ -143,25 +143,28 @@ void ValueSendMessage(void *pvParameters)
 {
     while (1)
     {
-        bool EtatSendMessage = SendMessage;
+        bool EtatSendMessage = SendMessage; // inverce sendMessage for switch for the send message 
+        
+        // send the motor message
         if (EtatSendMessage == true)
         {
-            LengMessage = 5;
+            LengMessage = 5; // length of message to motor
 #pragma region MsgMotor
-            Buffer[0] = AddressMotor;
+            Buffer[0] = AddressMotor; // set adresse to the buffer
             for (int i = 0; i < 4; i++)
             {
-                Buffer[i + 1] = SM[i] * 255 / 7300;
+                Buffer[i + 1] = SM[i] * 255 / 7300; // Tranforme the SM 0 to 7300 into 0 to 255
             }
 #pragma endregion
         }
+        // send the Sensor Message
         if (EtatSendMessage == false)
         {
-            LengMessage = 6;
+            LengMessage = 6; // length message
 #pragma region MsgSensor
-            Buffer[0] = AddressSensor;
-            u_int64_t MessageSensor = MesssageToSensor(Capteur[0], Capteur[1], Capteur[2]);
-            SendMessageToSensor(MessageSensor);
+            Buffer[0] = AddressSensor; // set adresse
+            u_int64_t MessageSensor = MesssageToSensor(Capteur[0], Capteur[1], Capteur[2]); // convret 3 sensor to the long
+            SendMessageToSensor(MessageSensor); // send message 
 
 #pragma endregion
         }
@@ -176,7 +179,7 @@ void ValueGetMessage(void *pvParameters)
         {
             if ((get_message[0] == 0x17) && (LengGetMessage == 4))
             {
-                SpeedMessage = get_message[1];
+                SpeedMessage = get_message[1]; // recup the value of the message
                 AngleMessage = get_message[2];
                 DirectionMessage = get_message[3];
             }
@@ -195,7 +198,7 @@ static void RS485(void *arg)
             switch (i)
             {
             case 0:
-                s1.InitSensorTrigger();
+                s1.InitSensorTrigger(); // send onde for the trigger
                 vTaskDelay(80 / portTICK_PERIOD_MS); // delay for the capteur is the time of receveite value
                 length = s1.GetDistance(); // allow stok the dist
                 break;
@@ -210,6 +213,7 @@ static void RS485(void *arg)
                 length = s3.GetDistance();
                 break;
             }
+            vTaskDelay(30/ portTICK_PERIOD_MS);
         }
         // code for the reseveid the temp
         /* length = s1.GetTemp(); */
@@ -220,8 +224,8 @@ void SetSpeeds(void *arg)
 {
     while (1)
     {
-        float Consigne = SpeedMessage * 7500.0 / 255.0;
-        MotorA.SetSpeedPID(Consigne, SM[0], kp, ki, kd);
+        float Consigne = SpeedMessage * 7500.0 / 255.0; // convert speedMessage 0 to 255 into 0 to 7500.0
+        MotorA.SetSpeedPID(Consigne, SM[0], kp, ki, kd); // set speed Motor
         MotorB.SetSpeedPID(Consigne, SM[1], kp, ki, kd);
         MotorC.SetSpeedPID(Consigne, SM[2], kp, ki, kd);
         MotorD.SetSpeedPID(Consigne, SM[3], kp, ki, kd);
@@ -263,7 +267,7 @@ extern "C"
 void app_main(void)
 {
     bt_init();
-    for the modifer the variable PID
+    //for the modifer the variable PID
     /*shell_init(115200);
     shell_start_task();*/
     s1.SensorAdress(0x11);
