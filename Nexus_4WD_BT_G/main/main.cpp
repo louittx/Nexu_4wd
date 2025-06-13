@@ -22,8 +22,8 @@
 #include "esp_flash.h"
 #include "esp_system.h"
 #include "sdkconfig.h"
-#include <inttypes.h>
 #include "esp32/rom/ets_sys.h"
+#include <math.h>
 #pragma endregion
 
 extern "C"
@@ -74,12 +74,13 @@ int Capteur[3];
 int SM[4];
 bool SendMessage = true;
 u_int8_t get_message[16];
-char Buffer[16];
+char Buffer[1023];
 u_int8_t AddressMotor = 0x44;
 u_int8_t AddressSensor = 0x45;
 uint8_t LengMessage = 0;
 uint8_t LengGetMessage = 0;
-
+char bufferSensor[16];
+char bufferEncoder[16];
 
 // variable for the RS485
 char DataReceive[126];
@@ -89,18 +90,40 @@ int Data = 0;
 int OldData = 0;
 int length = 0;
 
-#pragma endregion
-
-
 // motif varible for ce PID
 /*SHELL_PARAMETER_FLOAT(kp, "kp", 1);
 SHELL_PARAMETER_FLOAT(ki, "ki", 2.0);
 SHELL_PARAMETER_FLOAT(kd, "kd", 0.001);*/
 
-//variable for the PID not motif
+// variable for the PID not motif
 const uint8_t kp = 1;
 const uint8_t ki = 2;
 const float kd = 0.001;
+
+// variable for the motor
+int PuissanceSpeeds;
+
+int ConsigneA;
+int NewConsigneA;
+int OldConsigneA;
+uint8_t SensA = 1;
+
+int ConsigneB;
+int NewConsigneB;
+int OldConsigneB;
+uint8_t SensB = 1;
+
+int ConsigneC;
+int NewConsigneC;
+int OldConsigneC;
+uint8_t SensC = 1;
+
+int ConsigneD;
+int NewConsigneD;
+int OldConsigneD;
+uint8_t SensD = 1;
+
+#pragma endregion
 
 // defined the motor
 MotorEncoderHc595 MotorA;
@@ -108,7 +131,7 @@ MotorEncoderHc595 MotorB;
 MotorEncoderHc595 MotorC;
 MotorEncoderHc595 MotorD;
 
-// defined the Sensor 
+// defined the Sensor
 Sensor s1;
 Sensor s2;
 Sensor s3;
@@ -119,8 +142,8 @@ Sensor s3;
 u_int64_t MesssageToSensor(int16_t Sensor1, int16_t Sensor2, int16_t Sensor3)
 {
     u_int64_t Message = 0;
-    Message |= ((u_int64_t)(Sensor1 & 0xFFF) << 24);
-    Message |= ((u_int64_t)(Sensor2 & 0xFFF) << 12);
+    Message |= (u_int64_t)((Sensor1 & 0xFFF) << 24);
+    Message |= (u_int64_t)((Sensor2 & 0xFFF) << 12);
     Message |= (u_int64_t)(Sensor3 & 0xFFF);
     return Message;
 }
@@ -130,44 +153,87 @@ void SendMessageToSensor(u_int64_t Message)
 {
     for (int i = 0; i < 5; i++)
     {
-        Buffer[i + 1] = (Message >> ((8 * 4) - (8 * i))) & 0xFF;
+        bufferSensor[i + 1] = (Message >> ((8 * 4) - (8 * i))) & 0xFF;
     }
+}
+
+//fonctiont for the set speeds motor and direction
+void Direction(int Speed, float Dirc, float orian)
+{
+
+    int SpeedsAD = Speed * (sin(Dirc) - cos(Dirc)); // set speeds for the moves without rotation
+    int SpeedsBC = Speed * (sin(Dirc) + cos(Dirc));
+    if (abs(orian) < 0.1)
+    {
+        ConsigneA = (SpeedsAD); // set speeds with rotation
+        ConsigneB = (SpeedsBC);
+        ConsigneC = (SpeedsBC);
+        ConsigneD = (SpeedsAD);
+    }
+    else
+    {
+        ConsigneA = (SpeedsAD)*orian; // set speeds with rotation
+        ConsigneB = (SpeedsBC)*orian;
+        ConsigneC = (SpeedsBC) * -orian;
+        ConsigneD = (SpeedsAD) * -orian;
+    }
+    ESP_LOGI("ConsigneA","%d", ConsigneA);
+    //ESP_LOGI("orian2","%d", DirectionMessage);
+    MotorA.SetSpeedPID(abs(NewConsigneA), abs(SM[0]), kp, ki, kd); // activates the motor
+    MotorB.SetSpeedPID(abs(NewConsigneB), abs(SM[1]), kp, ki, kd);
+    MotorC.SetSpeedPID(abs(NewConsigneC), abs(SM[2]), kp, ki, kd);
+    MotorD.SetSpeedPID(abs(NewConsigneD), abs(SM[3]), kp, ki, kd);
 }
 
 #pragma endregion
 
-
 #pragma region Functions Task
 // task for say the Message then send Message
+
+void SendMessageBT(void *pvParameters)
+{
+    while (1)
+    {
+        bool EtatSendMessage = SendMessage;
+        if (EtatSendMessage)
+        {
+            LengMessage = 5;
+            for (int i = 0; i < LengMessage; i++)
+            {
+                Buffer[i] = bufferEncoder[i];
+            }
+        }
+        else
+        {
+            LengMessage = 6;
+            for (int i = 0; i < LengMessage; i++)
+            {
+                Buffer[i] = bufferSensor[i];
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
 void ValueSendMessage(void *pvParameters)
 {
     while (1)
     {
-        bool EtatSendMessage = SendMessage; // inverce sendMessage for switch for the send message 
-        
-        // send the motor message
-        if (EtatSendMessage == true)
-        {
-            LengMessage = 5; // length of message to motor
+        // the motor message
 #pragma region MsgMotor
-            Buffer[0] = AddressMotor; // set adresse to the buffer
-            for (int i = 0; i < 4; i++)
-            {
-                Buffer[i + 1] = SM[i] * 255 / 7300; // Tranforme the SM 0 to 7300 into 0 to 255
-            }
-#pragma endregion
-        }
-        // send the Sensor Message
-        if (EtatSendMessage == false)
+        bufferEncoder[0] = AddressMotor; // set adresse to the buffer
+        for (int i = 0; i < 4; i++)
         {
-            LengMessage = 6; // length message
+            bufferEncoder[i + 1] = SM[i] * 255 / 7300; // Tranforme the SM 0 to 7300 into 0 to 255
+        }
+#pragma endregion
+        // the Sensor Message
 #pragma region MsgSensor
-            Buffer[0] = AddressSensor; // set adresse
-            u_int64_t MessageSensor = MesssageToSensor(Capteur[0], Capteur[1], Capteur[2]); // convret 3 sensor to the long
-            SendMessageToSensor(MessageSensor); // send message 
+        bufferSensor[0] = AddressSensor;                                                // set adresse
+        u_int64_t MessageSensor = MesssageToSensor(Capteur[0], Capteur[1], Capteur[2]); // convret 3 sensor to the long
+        SendMessageToSensor(MessageSensor);                                             // send message
 
 #pragma endregion
-        }
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
@@ -176,18 +242,16 @@ void ValueGetMessage(void *pvParameters)
 {
     while (1)
     {
+        if ((get_message[0] == 0x17) && (LengGetMessage == 4))
         {
-            if ((get_message[0] == 0x17) && (LengGetMessage == 4))
-            {
-                SpeedMessage = get_message[1]; // recup the value of the message
-                AngleMessage = get_message[2];
-                DirectionMessage = get_message[3];
-            }
+            SpeedMessage = get_message[1]; // recup the value of the message
+            AngleMessage = get_message[2];
+            DirectionMessage = get_message[3];
         }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
-//task for the send and receviede the dist thanks to RS485
+// task for the send and receviede the dist thanks to RS485
 static void RS485(void *arg)
 {
     InitRS485();
@@ -198,22 +262,25 @@ static void RS485(void *arg)
             switch (i)
             {
             case 0:
-                s1.InitSensorTrigger(); // send onde for the trigger
-                vTaskDelay(80 / portTICK_PERIOD_MS); // delay for the capteur is the time of receveite value
-                length = s1.GetDistance(); // allow stok the dist
+                s1.InitSensorTrigger();
+                vTaskDelay(pdMS_TO_TICKS(80));                            // delay for the capteur is the time of receveite value
+                length = s1.GetDistance();                                // allow stok the dist
+                Capteur[0] = s1.ValueDistance(DataReceive) * 0xFFF / 300; // convert the diatnce of 0 to 300 in 0 to FFF
                 break;
             case 1:
                 s2.InitSensorTrigger();
-                vTaskDelay(80 / portTICK_PERIOD_MS);
+                vTaskDelay(pdMS_TO_TICKS(80));
                 length = s2.GetDistance();
+                Capteur[1] = s2.ValueDistance(DataReceive) * 0xFFF / 300;
                 break;
             case 2:
                 s3.InitSensorTrigger();
-                vTaskDelay(80 / portTICK_PERIOD_MS);
+                vTaskDelay(pdMS_TO_TICKS(80));
                 length = s3.GetDistance();
+                Capteur[2] = s3.ValueDistance(DataReceive) * 0xFFF / 300;
                 break;
             }
-            vTaskDelay(30/ portTICK_PERIOD_MS);
+            vTaskDelay(pdMS_TO_TICKS(30));
         }
         // code for the reseveid the temp
         /* length = s1.GetTemp(); */
@@ -224,35 +291,152 @@ void SetSpeeds(void *arg)
 {
     while (1)
     {
-        float Consigne = SpeedMessage * 7500.0 / 255.0; // convert speedMessage 0 to 255 into 0 to 7500.0
-        MotorA.SetSpeedPID(Consigne, SM[0], kp, ki, kd); // set speed Motor
-        MotorB.SetSpeedPID(Consigne, SM[1], kp, ki, kd);
-        MotorC.SetSpeedPID(Consigne, SM[2], kp, ki, kd);
-        MotorD.SetSpeedPID(Consigne, SM[3], kp, ki, kd);
-        vTaskDelay(10 / portTICK_PERIOD_MS);
-    }
-}
-// task for the control the dirction of robot
-void SetAngle(void *arg)
-{
-    while (1)
-    {
-        uint16_t GetAngle = (AngleMessage * 360) / 0xFF; // convet the msg to angle ranging from 0 to 360
-        if (GetAngle < 180)
+        float Angle = ((AngleMessage * 360) / 0xFF); // covert angle of 0 to 255 in 0 to 360
+        int Quartier = ((int)((Angle + 22.5) / 45)) % 8; // offset to 22.5°
+        float GetAngle =  -((Quartier * (2 * M_PI) )/ 8); // corvert in radian
+        if (sin(GetAngle) < 0)
         {
-            Data = MotorA.DirHc595(1);
-            Data = MotorB.DirHc595(1);
-            Data = MotorC.DirHc595(1);
-            Data = MotorD.DirHc595(1);
+            PuissanceSpeeds = -(SpeedMessage * 5300.0 / 255.0); // Speeds negative and convert
         }
         else
         {
-            Data = MotorA.DirHc595(2);
-            Data = MotorB.DirHc595(2);
-            Data = MotorC.DirHc595(2);
-            Data = MotorD.DirHc595(2);
+            PuissanceSpeeds = SpeedMessage * 5300.0 / 255.0;
         }
-        vTaskDelay(10 / portTICK_PERIOD_MS);
+        float oriantation = (((DirectionMessage *2.0)/ 255.0) - 1.0); // convert oriantation of 0 to 255 in -1 to 1
+        //ESP_LOGI("GetAngle = ", "%f", (GetAngle));
+        //ESP_LOGI("GetAngle + = ", "%f", (sin(GetAngle)+cos(GetAngle)));
+        //ESP_LOGI("GetAngle - = ", "%f", (sin(GetAngle)-cos(GetAngle)));
+        //ESP_LOGI("oriantation = ", "%f", oriantation);
+        Direction(PuissanceSpeeds, GetAngle, oriantation); // start the fonction for control motor
+        vTaskDelay(pdMS_TO_TICKS(20));
+    }
+}
+// task for the control the Invrec Direction
+void SetConsigneA(void *arg)
+{
+    while (1)
+    {
+        NewConsigneA = ConsigneA;
+        int i = 0;
+        while (SM[0] != NewConsigneA && (i != 50))
+        {
+            if (OldConsigneA * NewConsigneA < 0)
+            {
+                if (NewConsigneA < 0)
+                {
+                    SensA = 2;
+                }
+                else if (NewConsigneA > 0)
+                {
+                    SensA = 1;
+                }
+                NewConsigneA = 0;
+            }
+            i++;
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+        Data = MotorA.DirHc595(SensA);
+        OldConsigneA = NewConsigneA;
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+// tasck for teh set teh conisgne for the PID 
+void SetConsigneB(void *arg)
+{
+    while (1)
+    {
+        NewConsigneB = ConsigneB;
+        int i = 0;
+        while (SM[1] != NewConsigneB && (i != 50))
+        {
+            if (OldConsigneB * NewConsigneB < 0)
+            {
+                if (NewConsigneB < 0)
+                {
+                    SensB = 2;
+                }
+                else if (NewConsigneB > 0)
+                {
+                    SensB = 1;
+                }
+                NewConsigneB = 0;
+            }
+            i++;
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+        Data = MotorB.DirHc595(SensB);
+        OldConsigneB = NewConsigneB;
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+void SetConsigneC(void *arg)
+{
+    while (1)
+    {
+        NewConsigneC = ConsigneC;
+        int i = 0;
+        while (SM[2] != NewConsigneC && (i != 50))
+        {
+            if (OldConsigneC * NewConsigneC < 0)
+            {
+                if (NewConsigneC < 0)
+                {
+                    SensC = 2;
+                }
+                else if (NewConsigneC > 0)
+                {
+                    SensC = 1;
+                }
+                NewConsigneC = 0;
+            }
+            i++;
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+        Data = MotorC.DirHc595(SensC);
+        OldConsigneC = NewConsigneC;
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+void SetConsigneD(void *arg)
+{
+    while (1)
+    {
+        NewConsigneD = ConsigneD;
+        int i = 0;
+        while (SM[3] != NewConsigneD && (i != 50))
+        {
+            if (OldConsigneD * NewConsigneD < 0)
+            {
+                if (NewConsigneD < 0)
+                {
+                    SensD = 2;
+                }
+                else if (NewConsigneD > 0)
+                {
+                    SensD = 1;
+                }
+                NewConsigneD = 0;
+            }
+            i++;
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
+        Data = MotorD.DirHc595(SensD);
+        OldConsigneD = NewConsigneD;
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+// task to get the speeds of the motors
+void ValueSpeedsMotor(void *arg)
+{
+    while (1)
+    {
+    SM[0] = MotorA.SpeedMotor(); // read speed of motor
+    SM[1] = MotorB.SpeedMotor();
+    SM[2] = MotorC.SpeedMotor();
+    SM[3] = MotorD.SpeedMotor();
+    vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
@@ -263,11 +447,10 @@ extern "C"
     void app_main(void);
 }
 
-
 void app_main(void)
 {
     bt_init();
-    //for the modifer the variable PID
+    // for the modifer the variable PID
     /*shell_init(115200);
     shell_start_task();*/
     s1.SensorAdress(0x11);
@@ -303,30 +486,26 @@ void app_main(void)
     MotorD.InitMotorEncodeurHC595();
 #pragma endregion
 #pragma endregion
-    
-    // start the task
-    xTaskCreate(SetAngle, "SetAngle", 2048, NULL, 0, NULL);
-    xTaskCreate(SetSpeeds, "SetSpeed", 2048, NULL, 4, NULL);
-    xTaskCreate(RS485, "RS485", 2048, NULL, 2, NULL);
-    xTaskCreate(ValueGetMessage, "GetMsg", 4096, NULL, 5, NULL);
-    xTaskCreate(ValueSendMessage, "SendMsg", 4096, NULL, 3, NULL);
 
+    // start the task
+    xTaskCreate(SetConsigneA, "SetConsigneA", 1024, NULL, 0, NULL);
+    xTaskCreate(SetConsigneB, "SetConsigneB", 1024, NULL, 1, NULL);
+    xTaskCreate(SetConsigneC, "SetConsigneC", 1024, NULL, 2, NULL);
+    xTaskCreate(SetConsigneD, "SetConsigneD", 1024, NULL, 3, NULL);
+    xTaskCreate(ValueSpeedsMotor, "ValueSpeedsMotor",2048,NULL,4,NULL);
+    xTaskCreate(RS485, "RS485", 1024, NULL, 5, NULL);
+    xTaskCreate(SetSpeeds, "SetSpeed", 4096, NULL, 6, NULL);
+    xTaskCreate(SendMessageBT, "sendMsg", 4096, NULL, 7, NULL);
+    xTaskCreate(ValueSendMessage, "ValueMsg", 4096, NULL, 8, NULL);
+    xTaskCreate(ValueGetMessage, "GetMsg", 4096, NULL, 9, NULL);
 
     while (1)
     {
-        Capteur[0] = s1.ValueDistance(DataReceive) * 0xFFF / 300; // convert the diatnce of 0 to 300 in 0 to FFF
-        Capteur[1] = s2.ValueDistance(DataReceive) * 0xFFF / 300;
-        Capteur[2] = s3.ValueDistance(DataReceive) * 0xFFF / 300;
-        SM[0] = MotorA.SpeedMotor(); // read speed of motor
-        SM[1] = MotorB.SpeedMotor();
-        SM[2] = MotorC.SpeedMotor();
-        SM[3] = MotorD.SpeedMotor();
-        
         if (Data != OldData) // for not change if there is nothing to change
         {
             OldData = Data;
             MotorA.Hc595WriteByte(OldData); // push th confiration to the pins in the 74HC595
         }
-        vTaskDelay(50 / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
