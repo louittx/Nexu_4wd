@@ -19,7 +19,7 @@ static char *bda2str(uint8_t *bda, char *str, size_t size)
 
 static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 {
-    static const char local_device_name[] = "ESP32_NEW_NAME";
+    static const char local_device_name[] = "Nexu 4WD";
     char bda_str[18] = {0};
     static struct timeval time_old;
     static const esp_spp_sec_t sec_mask = ESP_SPP_SEC_AUTHENTICATE;

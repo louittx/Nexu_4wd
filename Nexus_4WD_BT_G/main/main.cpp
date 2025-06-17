@@ -177,7 +177,7 @@ void Direction(int Speed, float Dirc, float orian)
         ConsigneC = (SpeedsBC) * -orian;
         ConsigneD = (SpeedsAD) * -orian;
     }
-    ESP_LOGI("ConsigneA","%d", ConsigneA);
+    ESP_LOGI("Dirc","%d", Dirc);
     //ESP_LOGI("orian2","%d", DirectionMessage);
     MotorA.SetSpeedPID(abs(NewConsigneA), abs(SM[0]), kp, ki, kd); // activates the motor
     MotorB.SetSpeedPID(abs(NewConsigneB), abs(SM[1]), kp, ki, kd);
@@ -291,9 +291,9 @@ void SetSpeeds(void *arg)
 {
     while (1)
     {
-        float Angle = ((AngleMessage * 360) / 0xFF); // covert angle of 0 to 255 in 0 to 360
+        float Angle = ((AngleMessage * 360) / 0xFF); // convert angle of 0 to 255 in 0 to 360
         int Quartier = ((int)((Angle + 22.5) / 45)) % 8; // offset to 22.5°
-        float GetAngle =  -((Quartier * (2 * M_PI) )/ 8); // corvert in radian
+        float GetAngle =  -((Quartier * (2 * M_PI) )/ 8); // convert in radian, the negatif beauce the Angle is turns clockwise, and we can turns trigonometric sense 
         if (sin(GetAngle) < 0)
         {
             PuissanceSpeeds = -(SpeedMessage * 5300.0 / 255.0); // Speeds negative and convert

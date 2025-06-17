@@ -242,8 +242,8 @@ void MotorEncoder::SetSpeedPID(int consigne, float Speeds, float Kp, float Ki, f
     float Error = ConsigneNorm - SpeedNorm;
     Integral += Error * 0.01;
     float Derivative = (Error - OldError) / 0.01;
-    float OUTPUT = Kp * Error + Ki * Integral + Kd * Derivative;
-    float PWM = OUTPUT * 254.0;
+    float Sortie = Kp * Error + Ki * Integral + Kd * Derivative;
+    float PWM = Sortie * 254.0;
     OldError = Error;
     MotorEncoder::SetSpeed(PWM);
 }
@@ -303,7 +303,6 @@ float MotorEncoderHc595::SpeedMotor()
     vTaskDelay(10 / portTICK_PERIOD_MS);
     count = EncoderSetCount(_PcntUnit);
     float vitesse_moteur = (((count) * (60 / 0.01)) / 24);
-    vitesse_moteur = abs(vitesse_moteur);
     return vitesse_moteur;
 }
 void MotorEncoderHc595::SetSpeedPID(int consigne, float Speeds, float Kp, float Ki, float Kd)
@@ -345,5 +344,7 @@ void MotorEncoderHc595::Hc595WriteByte(uint8_t data)
         vTaskDelay(1 / portTICK_PERIOD_MS);
     }
     GPIOSetLevel(_latchPin, 1); // updates the 74hc595
+    vTaskDelay(1 / portTICK_PERIOD_MS);
+    GPIOSetLevel(_latchPin, 0);
 }
 

@@ -30,7 +30,7 @@ extern u_int8_t get_message[16];
 extern uint8_t LengGetMessage;
 extern int VM[4];
 extern int Capteur[3];
-extern char Buffer[16];
+extern char Buffer[1023];
 extern bool SendMessage;
 extern uint8_t LengMessage;
 
