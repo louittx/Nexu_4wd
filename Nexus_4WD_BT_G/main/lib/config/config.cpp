@@ -314,8 +314,8 @@ void MotorEncoderHc595::SetSpeedPID(int consigne, float Speeds, float Kp, float 
     float SpeedNorm = Speeds / 7650.0;
     float ConsigneNorm = consigne / 7650.0;
     float Error = ConsigneNorm - SpeedNorm;
-    Integral += Error * 0.02;
-    float Derivative = (Error - OldError) / 0.02;
+    Integral += Error * 0.01;
+    float Derivative = (Error - OldError) / 0.01;
     float Sortie = Kp * Error + Ki * Integral + Kd * Derivative;
     float PWM = Sortie * 254.0;
     OldError = Error;

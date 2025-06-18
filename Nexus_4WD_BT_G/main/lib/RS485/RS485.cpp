@@ -99,6 +99,7 @@ void Sensor::InitSensorTrigger()
 int Sensor::GetDistance()
 {
     RS485Send((uart_port_t)2, sendDistance, (int)6);
+    vTaskDelay(pdMS_TO_TICKS(5));
     int len = RS485Receive((uart_port_t)2);
     return len;
 }
@@ -106,6 +107,7 @@ int Sensor::GetDistance()
 int Sensor::GetTemp()
 {
     RS485Send((uart_port_t) 2, sendTemp, (int)6);
+    vTaskDelay(pdMS_TO_TICKS(5));
     int len = RS485Receive((uart_port_t) 2);
     return len;
 }
