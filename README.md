@@ -24,9 +24,9 @@ cette ligne ce mais dans le dans le `void app_main`
 
 ### Fonctionement
 #### Envoyer un message
-Pour envoyer un message il faut modifier le `Buffer` et la `LengMessage`
-le `Buffer` est un tableaux contenait les information d'un byte,
-la `LengMessage` est un varaible qui permte de deffinr la taille de notre tableaux a envoyer
+Pour envoyer un message il faut modifier le `Buffer` et la `LengMessage`.
+- le `Buffer` est un tableaux contenait les information d'un byte.
+- la `LengMessage` est un varaible qui permte de deffinr la taille de notre tableaux a envoyer.
 **Exemple**
 ```
 // sendMsg = Hello
@@ -38,9 +38,9 @@ Buffer[4] = 'o';
 LengMessage = 5;
 ```
 ### Recuper un message
-Pour reguper un message nous avons besoind de la variable `LengGetMessage` et tu tableaux `get_message`
-le tableaux `get_message` permet d'avoir les information des byte envoyer
-la variable `LengGetMessage` permet d'avoir le nombre de byte reçu ce qui intique la table de notre tableaux
+Pour reguper un message nous avons besoind de la variable `LengGetMessage` et tu tableaux `get_message`.
+- le tableaux `get_message` permet d'avoir les information des byte envoyer.
+- la variable `LengGetMessage` permet d'avoir le nombre de byte reçu ce qui intique la table de notre tableaux.
 
 **Exemple**
 ```
@@ -51,3 +51,26 @@ for (int i = 0; i<LengGetMessage, i++){
 }
 print(\n);
 ```
+
+## Config
+Sur cette lib il y a 3 `class`
+- Motor : permet de controler les moteur aevc le PWM et sont sens
+- MotorEncoder : Prendre les même fonction que Motor en rajoutant de fonction pour obtenir la vittesse, le sens et rajoute un aservisement PID
+- MotorEncoderHC595 ; Prend les même fonction que MotorEncoder en rajouter le changemeent de sens par un 74HC595 pour les moteur
+### variable a definir
+Les variable sont a intégre dans le code pour le fonctionnement de la lib bt
+```
+int Data;
+```
+### Initialisation
+```
+MotorAttached(gpio_num_t PWM, ledc_channel_t channel, uint8_t motor);
+MotorResolution(uint32_t Frequency, ledc_timer_bit_t DutyResolution);
+EncodeurAttached(gpio_num_t PinA, gpio_num_t PinB, pcnt_unit_t PcntUnit, uint64_t limit);
+hc595Attached(gpio_num_t dataPin, gpio_num_t clockPin, gpio_num_t latchPin);
+InitMotorEncodeurHC595();
+```
+`PWM` = Pin PWM pour controller la puissant de notre moteur
+`PinA` et `PinB` = Pin de l'encodeur
+
+### Fonctionement
