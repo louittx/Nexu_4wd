@@ -60,6 +60,7 @@ extern "C"
 #pragma region Define Variables
 #define FrequencyMotor 300000
 #define DutyResolutionMotor LEDC_TIMER_8_BIT // LEDC_TIMER_8_BIT = 0 to 255
+#define AngleResolution 32
 #pragma endregion
 
 #pragma endregion
@@ -97,8 +98,8 @@ SHELL_PARAMETER_FLOAT(kd, "kd", 0.001);*/
 
 // variable for the PID not motif
 const uint8_t kp = 1;
-const uint8_t ki = 2;
-const float kd = 0.001;
+const uint8_t ki = 1;
+const float kd = 0.0005;
 
 // variable for the motor
 int PuissanceSpeeds;
@@ -157,7 +158,7 @@ void SendMessageToSensor(u_int64_t Message)
     }
 }
 
-//fonctiont for the set speeds motor and direction
+// fonctiont for the set speeds motor and direction
 void Direction(int Speed, float Dirc, float orian)
 {
 
@@ -177,8 +178,7 @@ void Direction(int Speed, float Dirc, float orian)
         ConsigneC = (SpeedsBC) * -orian;
         ConsigneD = (SpeedsAD) * -orian;
     }
-    ESP_LOGI("Dirc","%d", Dirc);
-    //ESP_LOGI("orian2","%d", DirectionMessage);
+    ESP_LOGI("Dirc", "%f", Dirc);
     MotorA.SetSpeedPID(abs(NewConsigneA), abs(SM[0]), kp, ki, kd); // activates the motor
     MotorB.SetSpeedPID(abs(NewConsigneB), abs(SM[1]), kp, ki, kd);
     MotorC.SetSpeedPID(abs(NewConsigneC), abs(SM[2]), kp, ki, kd);
@@ -291,9 +291,9 @@ void SetSpeeds(void *arg)
 {
     while (1)
     {
-        float Angle = ((AngleMessage * 360) / 0xFF); // convert angle of 0 to 255 in 0 to 360
-        int Quartier = ((int)((Angle + 22.5) / 45)) % 8; // offset to 22.5°
-        float GetAngle =  -((Quartier * (2 * M_PI) )/ 8); // convert in radian, the negatif beauce the Angle is turns clockwise, and we can turns trigonometric sense 
+        float Angle = ((AngleMessage * 360) / 0xFF);     // convert angle of 0 to 255 in 0 to 360
+        int Quartier = ((int)((Angle + (360/(AngleResolution*2))) / (360/AngleResolution))) % AngleResolution; // offset to 22.5°
+        float GetAngle = -((Quartier * (2 * M_PI)) / AngleResolution); // convert in radian, the negatif beauce the Angle is turns clockwise, and we can turns trigonometric sense
         if (sin(GetAngle) < 0)
         {
             PuissanceSpeeds = -(SpeedMessage * 5300.0 / 255.0); // Speeds negative and convert
@@ -302,11 +302,7 @@ void SetSpeeds(void *arg)
         {
             PuissanceSpeeds = SpeedMessage * 5300.0 / 255.0;
         }
-        float oriantation = (((DirectionMessage *2.0)/ 255.0) - 1.0); // convert oriantation of 0 to 255 in -1 to 1
-        //ESP_LOGI("GetAngle = ", "%f", (GetAngle));
-        //ESP_LOGI("GetAngle + = ", "%f", (sin(GetAngle)+cos(GetAngle)));
-        //ESP_LOGI("GetAngle - = ", "%f", (sin(GetAngle)-cos(GetAngle)));
-        //ESP_LOGI("oriantation = ", "%f", oriantation);
+        float oriantation = (((DirectionMessage * 2.0) / 255.0) - 1.0); // convert oriantation of 0 to 255 in -1 to 1
         Direction(PuissanceSpeeds, GetAngle, oriantation); // start the fonction for control motor
         vTaskDelay(pdMS_TO_TICKS(20));
     }
@@ -340,7 +336,7 @@ void SetConsigneA(void *arg)
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
-// tasck for teh set teh conisgne for the PID 
+// tasck for teh set teh conisgne for the PID
 void SetConsigneB(void *arg)
 {
     while (1)
@@ -432,11 +428,11 @@ void ValueSpeedsMotor(void *arg)
 {
     while (1)
     {
-    SM[0] = MotorA.SpeedMotor(); // read speed of motor
-    SM[1] = MotorB.SpeedMotor();
-    SM[2] = MotorC.SpeedMotor();
-    SM[3] = MotorD.SpeedMotor();
-    vTaskDelay(pdMS_TO_TICKS(10));
+        SM[0] = MotorA.SpeedMotor(); // read speed of motor
+        SM[1] = MotorB.SpeedMotor();
+        SM[2] = MotorC.SpeedMotor();
+        SM[3] = MotorD.SpeedMotor();
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
@@ -463,36 +459,36 @@ void app_main(void)
     MotorA.EncodeurAttached(PinMAEncoderA, PinMAEncoderB, PCNT_UNIT_0, 10000);
     MotorA.hc595Attached(DS, SHCP, STCP);
     MotorA.InitMotorEncodeurHC595();
-#pragma endregion
+#pragma endregion Init Motor A
 #pragma region Init Motor B
     MotorB.MotorAttached(PinPWMB, LEDC_CHANNEL_1, 1);
     MotorB.MotorResolution(FrequencyMotor, DutyResolutionMotor);
     MotorB.EncodeurAttached(PinMBEncoderA, PinMBEncoderB, PCNT_UNIT_1, 10000);
     MotorB.hc595Attached(DS, SHCP, STCP);
     MotorB.InitMotorEncodeurHC595();
-#pragma endregion
+#pragma endregion Init Motor B
 #pragma region Init Motor C
     MotorC.MotorAttached(PinPWMC, LEDC_CHANNEL_2, 2);
     MotorC.MotorResolution(FrequencyMotor, DutyResolutionMotor);
     MotorC.EncodeurAttached(PinMCEncoderA, PinMCEncoderB, PCNT_UNIT_2, 10000);
     MotorC.hc595Attached(DS, SHCP, STCP);
     MotorC.InitMotorEncodeurHC595();
-#pragma endregion
+#pragma endregion Init Motor C
 #pragma region Init Motor D
     MotorD.MotorAttached(PinPWMD, LEDC_CHANNEL_3, 3);
     MotorD.MotorResolution(FrequencyMotor, DutyResolutionMotor);
     MotorD.EncodeurAttached(PinMDEncoderA, PinMDEncoderB, PCNT_UNIT_3, 10000);
     MotorD.hc595Attached(DS, SHCP, STCP);
     MotorD.InitMotorEncodeurHC595();
-#pragma endregion
-#pragma endregion
+#pragma endregion Init Motor D
+#pragma endregion Init Motor
 
     // start the task
     xTaskCreate(SetConsigneA, "SetConsigneA", 1024, NULL, 0, NULL);
     xTaskCreate(SetConsigneB, "SetConsigneB", 1024, NULL, 1, NULL);
     xTaskCreate(SetConsigneC, "SetConsigneC", 1024, NULL, 2, NULL);
     xTaskCreate(SetConsigneD, "SetConsigneD", 1024, NULL, 3, NULL);
-    xTaskCreate(ValueSpeedsMotor, "ValueSpeedsMotor",2048,NULL,4,NULL);
+    xTaskCreate(ValueSpeedsMotor, "ValueSpeedsMotor", 2048, NULL, 4, NULL);
     xTaskCreate(RS485, "RS485", 1024, NULL, 5, NULL);
     xTaskCreate(SetSpeeds, "SetSpeed", 4096, NULL, 6, NULL);
     xTaskCreate(SendMessageBT, "sendMsg", 4096, NULL, 7, NULL);
