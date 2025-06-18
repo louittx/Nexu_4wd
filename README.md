@@ -1,21 +1,43 @@
-# Nexu_4wd
-Ce projet refait la carte de controle du Robot Nexu 4wd en gardent c'est element (Moteur,Capteur et mecanique), Pour la carte de controle j'ai ajouter du bluetooth qui permetra de deplacer le robot, Pour les changment de la carte de controle j'ai chnager de MCU en mettant un ESP32 et sur ce projet nous avons aussi motifer les composant de controlle.
+# Nexu_4WD
 
-## Programme
-Sur cette parte nous allosn avoir plussieur branche qui compose plussieurs partie : 
-- Programme du Robot (C++ sur ESP_IDF)
-- Programme de l'application Android (Kotlin sur Android Studio) 
+Ce projet consiste à refaire entièrement la carte de contrôle du robot Nexu 4WD, tout en conservant ses composants mécaniques (moteurs, capteurs, structure).  
+La nouvelle carte intègre désormais le Bluetooth, ce qui permet de déplacer le robot via une application Android.  
+Un ESP32 remplace l'ancien microcontrôleur, et plusieurs composants de contrôle ont été modifiés ou optimisés.
 
-### Programme Robot
-- Pour avoir le programme global il faut aller sur la branche dev pour le programme final
-- Pour avoir les programme de chaque composant il faut aller dans chaque branche asiocer
+---
 
-### Programme Application Android
-Pour avoir l'aplication bluetooth aller sur la branche ascioser
+## Arborescence du projet
 
-## Eletronique 
-Sur la branche asciocer vous trouverez les Shémas du shéma eletrique et le routage, Vous trouverez aussi le fichier fusion 360 pour le motifier
-Pour plus de detaiile aler vous la branche ou sera expliquer le motage de chanque commposant et leurs fonctionnement
+Le projet est divisé en plusieurs branches, correspondant à différentes parties :
 
-## Composant de Base du Robot 
-Vous pouvais trouver sur cette partie les
+- **Programme du robot** (C++ via ESP-IDF)
+- **Application Android** (Kotlin via Android Studio)
+
+---
+
+### Programme du robot
+
+- Pour accéder au programme global, consultez la branche `dev`.
+- Pour accéder au code de chaque module séparément (moteurs, capteurs, Bluetooth...), consultez les branches dédiées à chaque composant.
+
+---
+
+### Application Android
+
+- Le code de l’application Bluetooth Android est disponible dans la branche correspondante (`bluetooth_app` ou nom équivalent).
+
+---
+
+## Électronique
+
+- Retrouvez les schémas électroniques (fichiers `.sch` et `.pcb`) et le routage dans la branche `hardware`.
+- Le fichier Fusion 360 est également inclus pour modification mécanique.
+- Pour plus de détails sur le montage de chaque composant, rendez-vous dans la branche ou le dossier correspondant à leur documentation.
+
+---
+
+## Composants de base du robot
+
+Cette section contient :
+- Les fiches techniques (datasheets) des composants utilisés.
+- Des explications sur leur fonctionnement et leur intégration dans la nouvelle carte de control
