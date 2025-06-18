@@ -70,7 +70,7 @@ EncodeurAttached(gpio_num_t PinA, gpio_num_t PinB, pcnt_unit_t PcntUnit, uint64_
 hc595Attached(gpio_num_t dataPin, gpio_num_t clockPin, gpio_num_t latchPin);
 InitMotorEncodeurHC595();
 ```
-`PWM` = Pin PWM pour controller la puissant de notre moteur
+`PWM` = Pin PWM pour controller la puissant de notre moteur \n
 `PinA` et `PinB` = Pin de l'encodeur
 
 ### Fonctionement
