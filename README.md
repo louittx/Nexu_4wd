@@ -57,6 +57,7 @@ Sur cette lib il y a 3 `class`
 - Motor : permet de controler les moteur aevc le PWM et sont sens
 - MotorEncoder : Prendre les même fonction que Motor en rajoutant de fonction pour obtenir la vittesse, le sens et rajoute un aservisement PID
 - MotorEncoderHC595 ; Prend les même fonction que MotorEncoder en rajouter le changemeent de sens par un 74HC595 pour les moteur max 4 moteur par 74HC595
+
 ### variable a definir
 Les variable sont a intégre dans le code pour le fonctionnement de la lib bt
 ```
@@ -115,3 +116,31 @@ Data = DirHc595(int dir);
 ```
 cette fonction permte de definir le sens de notre moteur sans changer le sens des 4 autre moteur
 
+##RS485
+Cette lib permet la cominication en RS485 pour les capteur ultrason et de temperature
+### variable a definir
+```
+char DataReceive[126];
+```
+### Initialisation
+```
+SensorAdress(uint8_t Address);
+```
+Initalise le capetur
+
+## Fonction
+### Distance
+```
+InitSensorTrigger();
+```
+permte de set le trigger
+
+```
+int len = GetDistance
+```
+permet d'envoyer le message pour resevoir puis reçois le message. revoir la lenguer du message reçus
+
+```
+int dist = ValueDistance
+```
+permte de verifier si le message revoit bien le distance et revoir la distance si cela et jsute revois la valuer de la distance.
