@@ -20,8 +20,34 @@ uint8_t LengMessage;
 ```
 Init()
 ```
-cette ligne ce mais dans le dans le 'void app_main'
+cette ligne ce mais dans le dans le `void app_main`
 
 ### Fonctionement
-#### envoyer un message
-il faut changer la valuer du tableaux du 
+#### Envoyer un message
+Pour envoyer un message il faut modifier le `Buffer` et la `LengMessage`
+le `Buffer` est un tableaux contenait les information d'un byte,
+la `LengMessage` est un varaible qui permte de deffinr la taille de notre tableaux a envoyer
+**Exemple**
+```
+// sendMsg = Hello
+Buffer[0] = 'H';
+Buffer[1] = 'e';
+Buffer[2] = 'l';
+Buffer[3] = 'l';
+Buffer[4] = 'o';
+LengMessage = 5;
+```
+### Recuper un message
+Pour reguper un message nous avons besoind de la variable `LengGetMessage` et tu tableaux `get_message`
+le tableaux `get_message` permet d'avoir les information des byte envoyer
+la variable `LengGetMessage` permet d'avoir le nombre de byte reçu ce qui intique la table de notre tableaux
+
+**Exemple**
+```
+// get message = Hello
+print("message reçu = ");
+for (int i = 0; i<LengGetMessage, i++){
+    print(get_message[i]);
+}
+print(\n);
+```
