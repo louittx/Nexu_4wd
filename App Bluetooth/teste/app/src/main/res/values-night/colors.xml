@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="Background">#06173E</color>
+    <color name="Bouton">#F6E1AE</color>
+    <color name="BoutonTexte">#EB9746</color>
+    <color name="Text">#DDE3C8</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#F6E1AE</color>
+</resources>

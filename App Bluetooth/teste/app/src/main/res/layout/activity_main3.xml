@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/Background"
+    tools:context=".MainActivity3">
+
+
+    <SeekBar
+        android:id="@+id/SeekBarDirection"
+        android:layout_width="272dp"
+        android:layout_height="69dp"
+        android:layout_marginEnd="128dp"
+        android:layout_marginBottom="28dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/RobotImage"
+        android:layout_width="302dp"
+        android:layout_height="167dp"
+        android:layout_marginStart="472dp"
+        android:layout_marginTop="92dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/nexu_4wd_robpt" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBarSensorRight"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="64dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="115.5dp"
+        android:layout_marginTop="155dp"
+        android:rotation="90"
+        app:layout_constraintStart_toStartOf="@+id/RobotImage"
+        app:layout_constraintTop_toBottomOf="@+id/ProgressBarSensorLeft" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBarSensorLeft"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="64dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="115.5dp"
+        android:layout_marginBottom="160dp"
+        android:rotation="270"
+        app:layout_constraintBottom_toBottomOf="@+id/RobotImage"
+        app:layout_constraintStart_toStartOf="@+id/RobotImage" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBarSensorFront"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="64dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="260dp"
+        android:layout_marginTop="71.5dp"
+        app:layout_constraintStart_toStartOf="@+id/RobotImage"
+        app:layout_constraintTop_toTopOf="@+id/RobotImage" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBarMotorLeftDown"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="45dp"
+        android:layout_marginBottom="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/RobotImage"
+        app:layout_constraintStart_toStartOf="@+id/RobotImage" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBarMotorLeftUp"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="115dp"
+        app:layout_constraintBottom_toBottomOf="@+id/ProgressBarMotorLeftDown"
+        app:layout_constraintStart_toEndOf="@+id/ProgressBarMotorLeftDown" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBarMotorRigthDown"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="164dp"
+        app:layout_constraintStart_toStartOf="@+id/ProgressBarMotorLeftDown"
+        app:layout_constraintTop_toTopOf="@+id/RobotImage" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBarMotorRigthUp"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@+id/ProgressBarMotorLeftUp"
+        app:layout_constraintTop_toTopOf="@+id/ProgressBarMotorRigthDown" />
+
+    <com.example.teste.Joystick
+        android:id="@+id/joystick"
+        android:layout_width="215dp"
+        android:layout_height="203dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="76dp"
+        android:layout_marginBottom="80dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
