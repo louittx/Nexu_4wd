@@ -29,4 +29,13 @@ Partie **Controle** : sur cette paretie nous avosn 2 controleur, le premier et l
 Partie **recption** : Sur cette partie nous avosn 7 **bar**, 4 bar permet de visualiser la vittesse de chaque roue de notre robot, le rest permet de recuper les information de la distance des 3 cpateur de distance sur notre robot.
 
 Pour le foonctionnement de cette page, nous avons 4 partie :
-- 
+- Rececption des donnée bluetooth
+- Envoer des donnée bluetooth
+- Recuperation les information de control
+- Affichage des information
+
+### Reception des données Bluetooth
+Pour le reception bluetooth il y a un **thread** qui permet d'éfectule la tache en memme temps, dans cette task nosu allosn envoyer les donner en bluetooth `service.connectedThread?.write(sendMessage, 4)`.
+### Envoyer des données Bluetooth
+### Recuperation les information de control
+### Affichage des information
