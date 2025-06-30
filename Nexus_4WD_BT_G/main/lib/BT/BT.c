@@ -68,15 +68,15 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
         if (param->data_ind.len < 128)
         {
             // send message to client
-            SendMessage = !SendMessage; // inverce sendMessage for switch for the send message 
+            SendMessage = !SendMessage;
             
-            esp_spp_write(param->data_ind.handle, LengMessage, (uint8_t *)Buffer); // send Message
+            esp_spp_write(param->data_ind.handle, LengMessage, (uint8_t *)Buffer);
             // message_get
             for (int i = 0; i < (param->data_ind.len); i++)
             {
-                get_message[i] = param->data_ind.data[i];// stoke the message to char
+                get_message[i] = param->data_ind.data[i];
             }
-            LengGetMessage = param->data_ind.len;// stoke the lengGetMessage
+            LengGetMessage = param->data_ind.len;
         }
         break;
     case ESP_SPP_SRV_OPEN_EVT:

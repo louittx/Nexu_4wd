@@ -303,6 +303,7 @@ float MotorEncoderHc595::SpeedMotor()
     vTaskDelay(10 / portTICK_PERIOD_MS);
     count = EncoderSetCount(_PcntUnit);
     float vitesse_moteur = (((count) * (60 / 0.01)) / 24);
+    vitesse_moteur = vitesse_moteur;
     return vitesse_moteur;
 }
 void MotorEncoderHc595::SetSpeedPID(int consigne, float Speeds, float Kp, float Ki, float Kd)
@@ -323,8 +324,7 @@ void MotorEncoderHc595::SetSpeedPID(int consigne, float Speeds, float Kp, float 
 }
 int MotorEncoderHc595::DirHc595(int dir)
 {
-    int NextData = 0;
-    NextData = (Data & ~(0b11 << (2 * _motor))) | (dir << (2 * _motor)); // set the pin of 74HC595 to direction for the motor
+    int NextData = (Data & ~(0b11 << (2 * _motor))) | (dir << (2 * _motor)); // set the pin of 74HC595 to direction for the motor // 
     /* exemple data = 01 11 00 10 with dir = 0b01 = 1, we want to modify the motor 2 so 11 to 01 for that : 
      01 11 00 10 & 11 00 11 11 = 01 00 00 10, for have 11 00 11 11, we can ~(00 11 00 00) thanks to ~(0b11<<(2*_motor))
      for replace 00 to 01, we use "or logic" 
@@ -344,7 +344,5 @@ void MotorEncoderHc595::Hc595WriteByte(uint8_t data)
         vTaskDelay(1 / portTICK_PERIOD_MS);
     }
     GPIOSetLevel(_latchPin, 1); // updates the 74hc595
-    vTaskDelay(1 / portTICK_PERIOD_MS);
-    GPIOSetLevel(_latchPin, 0);
 }
 

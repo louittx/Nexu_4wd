@@ -1,2 +1,2 @@
-source C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader/gdbinit/symbols
-source C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader/gdbinit/connect
+source /home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader/gdbinit/symbols
+source /home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader/gdbinit/connect

@@ -3,25 +3,20 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-# If CMAKE_DISABLE_SOURCE_CHANGES is set to true and the source directory is an
-# existing directory in our source tree, calling file(MAKE_DIRECTORY) on it
-# would cause a fatal error, even though it would be a no-op.
-if(NOT EXISTS "C:/Users/ASUS/esp/v5.4.1/esp-idf/components/bootloader/subproject")
-  file(MAKE_DIRECTORY "C:/Users/ASUS/esp/v5.4.1/esp-idf/components/bootloader/subproject")
-endif()
 file(MAKE_DIRECTORY
-  "C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader"
-  "C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix"
-  "C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/tmp"
-  "C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp"
-  "C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src"
-  "C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp"
+  "/home/louit/Documents/esp_IDF/code/v5.4.1/esp-idf/components/bootloader/subproject"
+  "/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader"
+  "/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix"
+  "/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/tmp"
+  "/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp"
+  "/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src"
+  "/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
+    file(MAKE_DIRECTORY "/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
 endif()

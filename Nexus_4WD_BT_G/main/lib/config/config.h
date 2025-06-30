@@ -77,7 +77,6 @@ private:
     float OldError;
 };
 
-
 class MotorEncoderHc595
 {
     public:

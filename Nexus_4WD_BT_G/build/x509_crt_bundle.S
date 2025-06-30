@@ -1,4 +1,4 @@
-/* * Data converted from C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from /home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 #if !defined (__APPLE__) && !defined (__linux__)

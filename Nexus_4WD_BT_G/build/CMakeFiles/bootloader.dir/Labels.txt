@@ -1,13 +1,13 @@
 # Target labels
  bootloader
 # Source files and their labels
-C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/CMakeFiles/bootloader
-C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/CMakeFiles/bootloader.rule
-C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/CMakeFiles/bootloader-complete.rule
-C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
-C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
-C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
-C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
-C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
-C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
-C:/Users/ASUS/Desktop/esp_32_idf/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
+/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/CMakeFiles/bootloader
+/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/CMakeFiles/bootloader.rule
+/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/CMakeFiles/bootloader-complete.rule
+/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+/home/louit/Documents/git/Nexu_4wd/Nexus_4WD_BT_G/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
